@@ -1,0 +1,34 @@
+---
+stages:
+  - build
+  - deploy
+
+variables:
+  # Define the version of Dart to be used
+  DART_VERSION: "3.4.3"
+
+image: dart:${DART_VERSION}
+
+setup:
+  stage: build
+  script:
+    - dart --version
+    - dart pub get
+    - dart run build_runner build
+    - dart doc .
+    - mkdir -p ./public
+    - mv ./doc/api/* ./public
+
+  cache:
+    paths:
+      - public/
+
+include:
+  - project: templates/ci/common
+    ref: main
+    file: 'pipelines/pages.yml'
+
+pages:
+  cache:
+    paths:
+      - public/

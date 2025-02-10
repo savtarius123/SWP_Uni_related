@@ -1,0 +1,155 @@
+# Installationshandbuch
+
+## Grundsätzliche Anmerkungen
+
+Die Installationsanleitungen sind für die Plattformen, wo es sinnvoll ist, jeweils aufgeteilt in eine Kompilierungs-Phase und eine Installations-Phase, die normalerweise auf verschiedenen Geräten umgesetzt werden können. Bei iOS/iPadOS ergibt sich die Besonderheit, dass das Gerät, das zur Kompilierung benutzt wird, auch benutzt werden muss, um die Anwendung auf dem Zielgerät zu installieren. Unter macOS kann mithilfie dieser Anleitung die Anwendung nur auf dem System ausgeführt werden, auf dem sie kompiliert wurde.
+
+Anpassungen im Quellcode sind nicht nötig, zu installierende Abhängigkeiten sind für jede Plattform separat dokumentiert. Die Konfiguration (insbesondere der Verbindungsdaten)  wird nach dem ersten Start der Anwendung in der GUI vorgenommen. Hierbei sollte beachtet werden, dass derzeit nur WebSocket-Verbindungen zum MQTT-Broker hergestellt werden können, dafür also die Netzwerk- und Broker-Voraussetzungen geschaffen sein müssen.
+
+# Plattform-spezifische Anleitungen
+
+## Ubuntu 24.04 LTS
+
+### Kompilieranweisungen
+1. Installieren Sie die Abhängigkeiten von Flutter und Git
+
+        sudo apt-get update -y && sudo apt-get upgrade -y
+        sudo apt-get install -y curl git unzip xz-utils zip libglu1-mesa
+        sudo apt-get install -y clang cmake git ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev
+2. Installieren Sie Flutter in ein geeignetes Verzeichnis
+
+        mkdir -p ~/development/
+        curl https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.27.3-stable.tar.xz | tar -xJ -C ~/development/
+3. Fügen Sie Flutter zum PATH hinzu
+
+        export PATH="$HOME/development/flutter/bin:$PATH"
+    Diesen Befehl müssen Sie wiederholen, wenn sie Flutter in einer neuen Shell-Sitzung nutzen möchten.
+4. Überprüfen Sie Ihre Flutter-Installation:
+
+        flutter doctor
+    Beheben Sie ggf. auftretende Probleme
+5. Klonen Sie das Git-Repository und wechseln Sie in das Projektverzeichnis
+
+        git clone https://gitlab.informatik.uni-bremen.de/swp-kh-2425/crash-and-burn.git ~/development/crash_and_burn
+        cd ~/development/crash_and_burn/
+    Geben Sie ggf. die für die Anmeldung im Git benötigten Zugangsdaten ein
+5. Kompilieren Sie die Anwendung für Linux
+
+        flutter build linux --release
+6. Komprimieren Sie die Anwendung als Tarball
+
+        tar -czf crash_and_burn_hab_ui.tar.gz -C build/linux/x64/release/bundle/ .
+
+### Installationsanweisungen
+1. Kopieren Sie das erstellte Archiv auf das Zielgerät.
+2. Extrahieren Sie den Inhalt des Archivs an einen geeigneten Ort, z.B. in ein Verzeichnis in /opt/
+
+        sudo mkdir -p /opt/crash_and_burn_hab_ui/
+        sudo tar -xzf crash_and_burn_hab_ui.tar.gz -C /opt/crash_and_burn_hab_ui
+4. Starten Sie die Anwendung, indem Sie die ausführbare Datei ausführen
+
+        /opt/crash_and_burn_hab_ui/crash_and_burn_marshabitat_ui
+    Auf Ubuntu 24.04.1 ist die Installation weiterer Abhängigkeiten nicht notwendig
+
+
+## macOS Version 15 Sequoia
+Es wird davon ausgegangen, dass zur Kompilierung und Installation der Anwendung
+ein Host mit macOS Version 15 Sequoia eingesetzt wird.
+### Schritte zur Kompilierung und Ausführung
+1. Flutter, XCode und CocoaPods installieren wie in der [offiziellen Anleitung](https://docs.flutter.dev/get-started/install/macos/desktop) beschrieben
+    * Flutter muss zum PATH hinzugefügt werden
+2. Git installieren
+3. Das Repo wird geklont und in das Verzeichnis der Anwendung gewechselt
+4. Im Terminal werden die folgenden Befehle ausgeführt
+    1. `flutter upgrade`
+    2. `flutter create` 
+    3. `flutter run --release`
+
+## Windows 11 Home Version 23H2
+* Die Build-Anweisungen setzen voraus, dass ein Host mit Windows 11 verwendet wird.
+
+### Kompilieranweisungen
+1. Installieren Sie Flutter und Git für Windows
+2. Starten Sie ein PowerShell-Fenster
+3. Führen Sie `flutter doctor -v` aus und beheben Sie eventuelle Probleme
+4. Klonen Sie das Git-Repository und wechseln Sie in das entsprechende Verzeichnis
+5. Führen Sie `flutter upgrade` aus
+6. Führen Sie `flutter create` aus
+7. Führen Sie `flutter build windows` aus
+8. Erstellen Sie ein neues Release-Verzeichnis (wir gehen davon aus, dass es "Release" heißt)
+9. Kopieren Sie aus dem Verzeichnis build\windows\runner\Release\ die folgenden Dateien und Verzeichnisse in das neue Release-Verzeichnis:
+   * The .exe file
+   * All .dll files
+   * The ´data´ directory
+10. Fügen Sie außerdem die folgenden redistributables zum Release-Verzeichnis hinzu:
+  * msvcp140.dll
+  * vcruntime140.dll
+  * vcruntime140_1.dll
+11. Komprimieren Sie das Release-Verzeichnis als .zip
+
+### Installationsanweisungen
+1. Kopieren Sie die .zip-Datei auf das Zielgerät
+2. Extrahieren Sie den Inhalt des .zip-Archivs an einen geeigneten Ort
+3. Erstellen Sie Verknüpfungen zur extrahierten .exe-Datei an bequem erreichbaren Orten
+4. Starten Sie die Anwendung über eine der Verknüpfunge
+
+## iPadOS 18.3
+### Voraussetzungen
+Es wird davon ausgegangen, dass zur Kompilierung und Installation der Anwendung
+ein Host mit macOS Version 15 Sequoia eingesetzt wird.
+
+### Schritte zur Vorbereitung des Zielgeräts
+1. Installieren Sie Flutter auf macOS
+
+        brew install --cask flutter
+
+2. Fügen sie den Path hinzu
+
+        fecho 'export PATH="$PATH:`flutter sdk-path`/bin"' >> ~/.zshrc
+        source ~/.zshrc
+        
+3. Installieren Sie Xcode.
+    
+        xcode-select --install
+
+
+        flutter run
+
+### Schritte zur Kompilierung und Ausführung
+1. Flutter, XCode und CocoaPods installieren wie in der [offiziellen Anleitung](https://docs.flutter.dev/get-started/install/macos/desktop) beschrieben
+    * Flutter muss zum PATH hinzugefügt werden
+4. Führen Sie die Folgende Befehle aus.
+
+        sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer 
+        sudo xcodebuild -runFirstLaunch
+        
+5. Installieren Sie die iOS-Entwicklungswerkzeuge
+
+        sudo gem install cocoapods
+7. Das Zielgerät per USB mit dem Mac verbinden
+    * "Trust" anklicken
+    * Das Gerät entsperren falls nötig
+8. Der [offiziellen Anleitung](https://developer.apple.com/documentation/xcode/enabling-developer-mode-on-a-device) folgen, um den Entwicklermodus zu aktivieren
+9. Vergewissern Sie sich, dass das Gerät in Xcode als vertrauenswürdiges Entwicklungsgerät registriert ist. 
+10. Starten Sie die Flutter-App auf iPadOS
+
+
+## Android Version 15.0
+
+### Kompilieranweisungen
+* Zum Kompilieren nach dieser Anleitung muss ein Host mit Ubuntu 24.04.1 genutzt werden.
+
+1. Folgen Sie zunächst der Kompilieranleitung für Linux
+2. Installieren Sie Android Studio
+
+        sudo snap install android-studio --classic
+        flutter doctor --android-licenses
+3. Kompilieren Sie die Anwendung für Android
+
+	flutter build apk
+4. Das fertige Paket liegt nun im Verzeichnis `build/app/outputs/apk/release/`
+        
+### Installationsanweisungen
+1. Aktivieren Sie Fremdquellen auf dem Zielgerät
+    * Das Verfahren dazu unterscheidet sich zwischen den Android-Versionen
+2. Tippen Sie das Paket an, um die Installation auf dem Gerät zu starten
